@@ -18,6 +18,44 @@ import { SocialModel } from "../../../models/social";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../RootStackScreen";
 
+// convert local file URI to a Blob
+import * as FileSystem from "expo-file-system";
+
+// Function to convert file URI to Blob
+import { Buffer } from "buffer";
+
+async function convertUriToBuffer(fileUri: string) {
+  // Read the file as a base64 string
+  const base64Data = await FileSystem.readAsStringAsync(fileUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  // Convert the base64 string to a Uint8Array using Buffer
+  const bytes = Uint8Array.from(Buffer.from(base64Data, 'base64'));
+  return bytes;
+}
+
+// supabase imports
+import { createClient } from "@supabase/supabase-js";
+
+// Make sure to set this in your .env file
+// Make sure to put your .env file in your .gitignore so your 
+// credentials are not exposed to the world!
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+if (!supabaseKey) {
+  throw new Error("SUPABASE_KEY is not defined. Please set it in your environment variables.");
+}
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error("SUPABASE_URL or SUPABASE_KEY is not defined. Please set them in your environment variables.");
+}
+
+// Declare your Supabase client here
+// Reference the docs here: https://supabase.com/docs
+// Ensure to install supabase on your project, you'll know 
+// if you did this correctly if you see a supabase folder in 
+// your project directory.
+
 interface Props {
   navigation: StackNavigationProp<RootStackParamList, "NewSocialScreen">;
 }
@@ -56,19 +94,19 @@ export default function NewSocialScreen({ navigation }: Props) {
       // NOTE: THE BULK OF THIS FUNCTION IS ALREADY IMPLEMENTED FOR YOU IN HINTS.TSX.
       // READ THIS TO GET A HIGH-LEVEL OVERVIEW OF WHAT YOU NEED TO DO, THEN GO READ THAT FILE!
 
-      // (0) Firebase Cloud Storage wants a Blob, so we first convert the file path
-      // saved in our eventImage state variable to a Blob.
+      // (0) Supabase Storage wants the image as a Uint8Array buffer, so we first convert 
+      // the file path saved in our eventImage state variable to that.
+      // This is done using the convertUriToBuffer function above.
+      // Ensure to use the "await" keyword, since this is an async function.
 
-      // (1) Write the image to Firebase Cloud Storage. Make sure to do this
-      // using an "await" keyword, since we're in an async function. Name it using
-      // the uuid provided below.
+      // (1) Write the image to Supabase Storage. Again, use the
+      // "await" keyword, since we're in an async function.
 
-      // (2) Get the download URL of the file we just wrote. We're going to put that
-      // download URL into Firestore (where our data itself is stored). Make sure to
-      // do this using an async keyword.
+      // (2) Get the public URL of the file we just wrote. We're going to put that
+      //  URL into Firestore (where our data itself is stored).
 
       // (3) Construct & write the social model to the "socials" collection in Firestore.
-      // The eventImage should be the downloadURL that we got from (3).
+      // The eventImage should be the URL that we got from (3).
       // Make sure to do this using an async keyword.
       
       // (4) If nothing threw an error, then go to confirmation screen (which is a screen you must implement).
